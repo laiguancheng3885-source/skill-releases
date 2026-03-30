@@ -111,76 +111,63 @@ Step 7  骨架模板自动发现（AI推导方案时触发）
 - ✅ **每个方案 wrapper 加 Bridge 选择属性**（见下方结构）
 - ❌ 不放真实文案、图标、按钮内容
 
-**骨架预览 HTML 结构**（含 Bridge 单选）：
+> ⚠️ **严禁自定义选择逻辑** — 禁止自行实现任何替代函数（`selectScheme`、`copyResult`、`submitChoice` 等）。
+> ⚠️ **严禁自定义底部栏** — 禁止写 `.confirm-bar`、`.btn-confirm` 等 CSS 及对应 HTML，bridge-client.js 已内置。
+> ⚠️ **严禁修改类名** — 高亮类名必须是 `vsb-selected`（bridge-client.js 添加），不要另加 `.selected`、`.active` 等。
 
+**Phase 1 骨架 HTML 生成方式（必须严格按此操作，不得从零生成）：**
+
+**第一步：读取基础模板**
+```
+读取文件：skill研发/skills/xyq-ui-design-system/templates/phase1_base.html
+```
+> 此文件已包含全部 CSS、bridge 接入脚本、vsb-selected 类名。禁止修改文件中除 `[PAGE_TITLE]` 和 `<!-- INSERT SCHEMES START/END -->` 之间的任何内容。
+
+**第二步：只填两处内容，其余照搬**
+
+填写位置 ①：把 `[PAGE_TITLE]` 替换为界面名称（如"梦境成果界面"）
+
+填写位置 ②：在 `<!-- INSERT SCHEMES START -->` 和 `<!-- INSERT SCHEMES END -->` 之间插入方案，格式：
 ```html
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>布局骨架方案选择</title>
-<style>
-  body { background: #1a1a2e; display: flex; gap: 24px; padding: 24px 24px 120px;
-         flex-wrap: wrap; font-family: 'Microsoft YaHei', sans-serif; }
-  .scheme-wrapper { display: flex; flex-direction: column; align-items: center; gap: 8px;
-                    border-radius: 8px; padding: 12px; transition: all .2s; }
-  .scheme-label { color: #e6e6e6; font-size: 14px; font-weight: bold; }
-  .scheme-tag   { color: #8b96b6; font-size: 12px; }
-</style>
-</head>
-<body>
-  <!-- 方案0（用户草图，如有）— 加 Bridge 属性 -->
   <div class="scheme-wrapper"
        data-group="骨架方案"
        data-value="方案0·用户草图"
        onclick="vsBridge.select(this)">
     <div class="scheme-label">方案0 · 您的草图</div>
-    [骨架HTML]
+    <div class="scheme-tag">忠实还原草图布局</div>
+    [此处填骨架HTML内容]
   </div>
 
-  <!-- 方案A（模板匹配）-->
   <div class="scheme-wrapper"
        data-group="骨架方案"
-       data-value="方案A·SKL-001左右分栏"
+       data-value="方案A·[模板名称]"
        onclick="vsBridge.select(this)">
-    <div class="scheme-label">方案A · SKL-001 左右分栏</div>
-    <div class="scheme-tag">来源：模板库</div>
-    [骨架HTML]
+    <div class="scheme-label">方案A · [模板名称]</div>
+    <div class="scheme-tag">来源：[SKL-xxx]</div>
+    [此处填骨架HTML内容]
   </div>
-
-  <!-- 方案B（AI推导，如有）-->
-  <div class="scheme-wrapper"
-       data-group="骨架方案"
-       data-value="方案B·AI推导"
-       onclick="vsBridge.select(this)">
-    <div class="scheme-label">方案B · AI 推导</div>
-    <div class="scheme-tag">AI 根据需求推导</div>
-    [骨架HTML]
-  </div>
-
-  <!-- Bridge 单选模式 -->
-  <script src="/bridge-client.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', () =>
-      vsBridge.init({ mode: 'single', required: ['骨架方案'] })
-    );
-  </script>
-</body>
-</html>
 ```
+
+> ⚠️ `onclick` 只能是 `vsBridge.select(this)`，`data-group` 只能是 `"骨架方案"`，这两个值与基础模板底部的 `vsBridge.init` 参数对应，改了会导致选择失效。
+
+**输出前自查（2项即可，其余已由基础模板保证）：**
+- [ ] `<!-- INSERT SCHEMES START/END -->` 之间每个 wrapper 的 `onclick` 都是 `vsBridge.select(this)`
+- [ ] 没有在 `</body>` 之前插入任何额外 `<script>` 或 `<style>`
 
 #### 1.4 自动打开预览 + 等待选择结果
 
-HTML 文件生成后，**AI 必须立即用终端命令自动打开预览**，无需用户手动操作：
+HTML 文件生成后，**AI 必须立即用终端命令自动启动 Bridge 服务器并打开预览**，无需用户手动操作：
 
 ```
-start "" "[生成的HTML文件路径]"
+start "XYQ Bridge" cmd /c ""E:\AI开发\skill研发\skills\xyq-ui-design-system\open_preview.bat" "[生成的HTML文件绝对路径]""
 ```
 
-> 例：`start "" "e:\AI开发\skill研发\skills\xyq-ui-design-system\test\trade_skeleton_phase1.html"`
+> 例：`start "XYQ Bridge" cmd /c ""E:\AI开发\skill研发\skills\xyq-ui-design-system\open_preview.bat" "e:\AI开发\skill研发\skills\xyq-ui-design-system\test\trade_skeleton_phase1.html""`
+
+**注意**：`start` + `cmd /c` 会在独立窗口中运行 bat，不阻塞 AI 对话，服务器在用户完成选择后自动退出。
 
 然后提示：
-> 📐 **布局骨架预览已自动打开** → 点击选择方案 → 右下角「确认选择」亮起后点击 → Ctrl+V 粘贴结果到对话继续
+> 📐 **布局骨架预览已自动打开，Bridge 服务已启动** → 点击选择方案 → 右下角「确认选择」亮起后点击 → Ctrl+V 粘贴结果到对话继续
 
 **当 AI 在对话中收到 `[VBridge]` 开头的消息时，自动解析并进入 Step 2，无需用户额外说明。**
 
@@ -312,7 +299,8 @@ start "" "[生成的HTML文件路径]"
   <!-- ... -->
 
   <!-- Bridge 多选模式，声明所有必选分组 -->
-  <script src="/bridge-client.js"></script>
+  <!-- ⚠️ 必须用相对路径，确保 file:// 直接打开也能加载 -->
+  <script src="../bridge-client.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () =>
       vsBridge.init({ mode: 'multi-step', required: ['[分区名A]', '[分区名B]'] })
