@@ -45,8 +45,10 @@ metadata:
 | 详情按钮（? 圆形） | `## Detail Button` |
 | 页签（二级/三级/外挂） | `## Tabs` |
 | 输入框 | `## Input` |
+| 属性展示（标签+只读框） | `## Stat Display` |
 | 单选框/复选框 | `## Radio & Checkbox` |
 | 翻页控件 | `## Pagination` |
+| 数量选择器（加减按钮） | `## Quantity Selector` |
 | 窗体 Header/Body 规格 | `## Windows / Panels` |
 | 区域衬底（浅色/深色） | `## Area Background` |
 | 道具图标（标准/小/圆形） | `## Item Icon` |
@@ -274,19 +276,23 @@ metadata:
 | 外挂页签 | `.ui-window-with-side-tabs`, `.ui-side-tabs`, `.ui-side-tab` |
 | 窗口 | `.ui-window`, `.ui-window-header`, `.ui-window-title`, `.ui-window-controls`, `.ui-window-body` |
 | 输入框 | `.ui-input` |
+| 属性展示 | `.ui-stat-display`, `.ui-stat-label`, `.ui-stat-label-2/3/4`, `.ui-stat-label-tight/normal`, `.ui-stat-input`, `.ui-stat-btns`, `.ui-stat-tag-red/blue`, `.ui-stat-tag-2/3`, `.ui-stat-label-highlight` |
 | 单选/复选 | `.ui-radio` / `.ui-checkbox` |
+| 翻页控件 | `.ui-pagination`, `.ui-pagination-info` |
+| 数量选择器 | `.ui-quantity-selector`, `.ui-quantity-value` |
 | 区域衬底 | `.ui-area-bg`（浅色）/ `.ui-area-bg-dark`（深色） |
 | 设计背景 | `.design-bg`（`<body>`）/ `.design-container`（包裹 UI） |
-| 道具图标 | `.ui-item-icon`, `.ui-item-level`, `.ui-item-icon-small`, `.ui-item-icon-round` |
-| 背包 | `.ui-inventory`, `.ui-inv-cell`（格内图标加 `.ui-item-icon--cell`） |
+| 道具图标 | `.ui-item-icon`（52×52）, `.ui-item-level`（14px，圆形图标内为12px）, `.ui-item-icon-small`（30×30）, `.ui-item-icon-round`（30×30圆形） |
+| 背包 | `.ui-inventory`, `.ui-inv-cell`（格内 `.ui-item-icon` 无需额外修饰类） |
 | 列表项 | `.ui-list-item` |
-| 数据表格 | `.ui-table`, `.ui-table-header`, `.ui-table-body`, `.ui-table-row` |
+| 数据表格 | `.ui-table`, `.ui-table-header`, `.ui-table-body`, `.ui-table-row`, `.ui-table-sort-icon` |
 | 星级 | `.ui-stars`, `.ui-stars--1/2/3` |
 | 玩家头像 | `.ui-avatar`（空状态: `.ui-avatar.empty`，带加号: `.ui-avatar.empty.show-plus`） |
 | 召唤兽头像 | `.ui-pet-avatar`（标准52px）/ `.ui-pet-avatar-small`（小30px） |
 | 人物/召唤兽模型 | `.ui-model-character` / `.ui-model-pet`（空div，图片由CSS背景自动加载） |
 | 滚动区域 | `.ui-scroll-area`（自带overflow+滚动条）/ `.ui-scrollbar`（仅滚动条样式） |
 | 奖励进度条 | `.ui-reward-progress`（详见 components.md Reward Progress Bar 章节） |
+| 文字颜色工具类 | `.ui-text-light-bg-primary/secondary/success/link/error`（浅色背景）<br>`.ui-text-dark-bg-primary/secondary/success/warning/error`（深色背景） |
 
 ---
 
