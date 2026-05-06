@@ -1,7 +1,9 @@
 # Skill 列表
 
-最后更新: 2026-04-08 03:15
+最后更新: 2026-05-06 03:36
 
+- [figma-ui-restore-v3](skills/figma-ui-restore-v3/skill.md)
+- [game-interaction-patent-writer](skills/game-interaction-patent-writer/skill.md)
 - [game-ui-interaction-writer](skills/game-ui-interaction-writer/skill.md)
 - [game-ux-designer-v1.1](skills/game-ux-designer-v1.1/skill.md)
 - [game-ux-designer-v1.2.1](skills/game-ux-designer-v1.2.1/skill.md)
