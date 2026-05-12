@@ -1,7 +1,8 @@
 # Skill 列表
 
-最后更新: 2026-05-06 03:36
+最后更新: 2026-05-12 06:49
 
+- [PC转HT](skills/PC转HT/skill.md)
 - [figma-ui-restore-v3](skills/figma-ui-restore-v3/skill.md)
 - [game-interaction-patent-writer](skills/game-interaction-patent-writer/skill.md)
 - [game-ui-interaction-writer](skills/game-ui-interaction-writer/skill.md)
