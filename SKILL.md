@@ -13,7 +13,7 @@ description: >
 allowed-tools: Bash Read Write Edit Glob Grep
 metadata:
   tags: ui-design, game-ui, xyq, fantasy-rpg, design-system, html, retro-modern
-  version: "2.5"
+  version: "2.6"
 ---
 
 # XYQ畅玩服 UI Design System
@@ -62,6 +62,7 @@ metadata:
 | 星级评分 | `## Stars Rating` |
 | 滚动区域 | `## Scroll Area` |
 | 奖励进度条 | `## Reward Progress Bar` |
+| **CSS Class 名速查（全控件）** | `## CSS Class Reference` |
 
 ### 🎨 颜色/字体 → `references/color-system.md`
 
@@ -103,7 +104,7 @@ metadata:
 | 模板 ID | 名称 | 命中关键词 | 结构特征 | 规范文件 | 参考 HTML |
 |---------|------|-----------|---------|---------|----------|
 | `act-bp` | 活动BP界面 | 活动BP、BP奖励、赛季通行证、战令、庆典、等级奖励、赛季奖励 | Banner + 进度条 + 横向卡片列表 + 领取按钮 | `assets/templates/活动BP/活动BP界面规范.md` | `assets/templates/活动BP/新春庆典2.html`（新春红主题）<br>`assets/templates/活动BP/暑假活动BP.html`（海洋蓝主题） |
-| `fest-main` | 节日活动主界面 | 节日活动、活动主界面、玩法入口、活动大厅、活动总览 | 全屏背景图 + 绝对定位按钮组 + 多玩法入口 | `assets/templates/节日活动主界面/节日活动主界面规范.md` | `assets/templates/节日活动主界面/index.html` |
+| `fest-main` | 节日活动主界面 | 节日活动、活动主界面、玩法入口、活动大厅、活动总览 | 全屏背景图 + 绝对定位按钮组 + 多玩法入口 | `assets/templates/节日活动主界面/节日活动主界面规范.md` | `assets/templates/节日活动主界面/index.html`<br>子组件：`assets/templates/节日活动主界面/积分进度条组件.html`（积分/进度条专用，命中关键词：积分进度、活动积分、积分奖励） |
 | `shop-buy` | 购买界面 | 购买、购买界面、商店购买、商城购买、买道具 | 5×4背包格子 + 外挂页签切换货币 + 单价/数量/总额输入框 | `assets/templates/购买界面/购买界面规范.md` | `assets/templates/购买界面/购买界面.html` |
 | `reward-popup` | 奖励弹窗 | 奖励说明、规则说明、活动规则、玩法说明、说明弹窗 | 小弹窗 + 纯文字说明 + 四角装饰 + 多段落列表 | `assets/templates/奖励弹窗/奖励弹窗规范.md` | `assets/templates/奖励弹窗/奖励弹窗.html` |
 | `reward-tier-claim` | 礼包领取 | 礼包领取、档位奖励、分段奖励、阶段奖励、任务礼包、勤劳致富 | 档位列表 + 条件胶囊标签 + 按钮三态（领取/已领取/暂未解锁） | `assets/templates/礼包领取/礼包领取规范.md` | `assets/templates/礼包领取/勤劳致富礼包领取界面.html` |
@@ -146,15 +147,31 @@ metadata:
 ```
 xyq-ui-design-system/
 ├── assets/
-│   ├── ui_components.css          ← 全局样式
+│   ├── ui_components.css          ← 全局样式（含 @font-face + 全局 -webkit-text-stroke）
+│   ├── 设计模板.html              ← 通用兜底模板
+│   ├── 控件展示.html              ← 所有控件可视化预览
+│   ├── 编辑器.html                ← 开发工具
 │   ├── resource/                  ← 通用共享资源（道具图标、字体、人物等）
 │   └── templates/
 │       ├── 活动BP/
-│       │   ├── 新春庆典2.html     ← 参考模板（只读，不修改）
+│       │   ├── 活动BP界面规范.md
+│       │   ├── 新春庆典2.html     ← 参考模板（只读）
+│       │   ├── 暑假活动BP.html    ← 参考模板（只读）
 │       │   └── resource/          ← 活动BP专属资源
-│       └── 节日活动主界面/
-│           ├── index.html         ← 参考模板（只读，不修改）
-│           └── images/            ← 节日活动专属图片
+│       ├── 节日活动主界面/
+│       │   ├── 节日活动主界面规范.md
+│       │   ├── index.html         ← 参考模板（只读）
+│       │   ├── 积分进度条组件.html ← 子组件（只读）
+│       │   └── images/            ← 节日活动专属图片
+│       ├── 购买界面/
+│       │   ├── 购买界面规范.md
+│       │   └── 购买界面.html      ← 参考模板（只读）
+│       ├── 奖励弹窗/
+│       │   ├── 奖励弹窗规范.md
+│       │   └── 奖励弹窗.html      ← 参考模板（只读）
+│       └── 礼包领取/
+│           ├── 礼包领取规范.md
+│           └── 勤劳致富礼包领取界面.html ← 参考模板（只读）
 └── output/                        ← ⛔ 唯一工作区，所有输出文件放这里
     └── 界面名称.html
 ```
@@ -174,12 +191,15 @@ xyq-ui-design-system/
 
 ### 复制模板到 output/ 时的路径替换规则
 
-| 模板内原路径 | 替换为 |
-|------------|--------|
-| `../../ui_components.css` | `../assets/ui_components.css` |
-| `../../resource/` | `../assets/resource/` |
-| `./resource/` | `../assets/templates/活动BP/resource/` |
-| `../../节日活动主界面/images/` | `../assets/templates/节日活动主界面/images/` |
+| 模板 | 模板内原路径 | 替换为 |
+|------|------------|--------|
+| 通用（所有模板） | `../../ui_components.css` | `../assets/ui_components.css` |
+| 通用（所有模板） | `../../resource/` | `../assets/resource/` |
+| 活动BP | `./resource/` | `../assets/templates/活动BP/resource/` |
+| 节日活动主界面 | `./images/` 或 `../../节日活动主界面/images/` | `../assets/templates/节日活动主界面/images/` |
+| 购买界面 | （无专属资源，仅通用） | — |
+| 奖励弹窗 | （无专属资源，仅通用） | — |
+| 礼包领取 | （无专属资源，仅通用） | — |
 
 ---
 
@@ -244,6 +264,7 @@ xyq-ui-design-system/
 - 允许字号：`16px`（主要）和 `14px`（次要）— **这是唯一允许的两种尺寸**
 - 字体通过 `assets/ui_components.css` 的 `@font-face` 自动注入，无需在 HTML 内重写
 - 如有文本 `<14px`，必须输出 ⚠️ 警告并征得用户确认后方可使用
+- ⛔ **字重锁定 `normal`**：禁止使用 `font-weight: bold` 或数值 ≥600。视觉重量由全局 `* { -webkit-text-stroke: 0.3px currentColor }` 在 `ui_components.css` 内统一注入（用于补偿浏览器 DirectWrite 与游戏 GDI 渲染差异），**不要在任何控件内重复声明 `-webkit-text-stroke`**（除非是装饰性大描边特效）。如需调整描边强度，只改 `ui_components.css` 第 52 行那一处（推荐区间 `0.2px – 0.35px`）。
 
 ---
 
@@ -293,6 +314,8 @@ xyq-ui-design-system/
 - [ ] Window Body 背景色 `#11151c` 未被修改 ✓
 - [ ] Window Header 渐变色 `#233263→#2E4077` 未被修改 ✓
 - [ ] 所有文字字号在 `14px` / `16px` 范围内 ✓
+- [ ] 所有 `font-weight` 为 `normal`（无 `bold` 或数值 ≥600） ✓
+- [ ] 未在任何控件内重复声明 `-webkit-text-stroke`（已由全局 `*` 注入） ✓
 
 以上未全部确认，不得输出 HTML。
 
@@ -345,37 +368,10 @@ xyq-ui-design-system/
 
 ---
 
-## CSS Class Reference（快速查阅）
+## CSS Class Reference
 
-| 组件 | Class Name(s) |
-|------|---------------|
-| 主按钮 | `.ui-btn .ui-btn-primary` |
-| 次按钮 | `.ui-btn .ui-btn-secondary` |
-| 图标按钮 | `.ui-btn-icon` / `.ui-btn-icon-primary` |
-| 详情按钮 | `.ui-btn-detail` |
-| 下拉按钮 | `.ui-btn .ui-btn-secondary .ui-btn-dropdown` |
-| 二级页签 | `.ui-tab-secondary` / Container: `.ui-tabs-secondary` |
-| 三级页签 | `.ui-tab-tertiary` / Container: `.ui-tabs-tertiary` |
-| 外挂页签 | `.ui-window-with-side-tabs`, `.ui-side-tabs`, `.ui-side-tab` |
-| 窗口 | `.ui-window`, `.ui-window-header`, `.ui-window-title`, `.ui-window-controls`, `.ui-window-body` |
-| 输入框 | `.ui-input` |
-| 属性展示 | `.ui-stat-display`, `.ui-stat-label`, `.ui-stat-label-2/3/4`, `.ui-stat-label-tight/normal`, `.ui-stat-input`, `.ui-stat-btns`, `.ui-stat-tag-red/blue`, `.ui-stat-tag-2/3`, `.ui-stat-label-highlight` |
-| 单选/复选 | `.ui-radio` / `.ui-checkbox` |
-| 翻页控件 | `.ui-pagination`, `.ui-pagination-info` |
-| 数量选择器 | `.ui-quantity-selector`, `.ui-quantity-value` |
-| 区域衬底 | `.ui-area-bg`（浅色）/ `.ui-area-bg-dark`（深色） |
-| 设计背景 | `.design-bg`（`<body>`）/ `.design-container`（包裹 UI） |
-| 道具图标 | `.ui-item-icon`（52×52）, `.ui-item-level`（14px，圆形图标内为12px）, `.ui-item-icon-small`（30×30）, `.ui-item-icon-round`（30×30圆形） |
-| 背包 | `.ui-inventory`, `.ui-inv-cell`（格内 `.ui-item-icon` 无需额外修饰类） |
-| 列表项 | `.ui-list-item` |
-| 数据表格 | `.ui-table`, `.ui-table-header`, `.ui-table-body`, `.ui-table-row`, `.ui-table-sort-icon` |
-| 星级 | `.ui-stars`, `.ui-stars--1/2/3` |
-| 玩家头像 | `.ui-avatar`（空状态: `.ui-avatar.empty`，带加号: `.ui-avatar.empty.show-plus`） |
-| 召唤兽头像 | `.ui-pet-avatar`（标准52px）/ `.ui-pet-avatar-small`（小30px） |
-| 人物/召唤兽模型 | `.ui-model-character` / `.ui-model-pet`（空div，图片由CSS背景自动加载） |
-| 滚动区域 | `.ui-scroll-area`（自带overflow+滚动条）/ `.ui-scrollbar`（仅滚动条样式） |
-| 奖励进度条 | `.ui-reward-progress`（详见 components.md Reward Progress Bar 章节） |
-| 文字颜色工具类 | `.ui-text-light-bg-primary/secondary/success/link/error`（浅色背景）<br>`.ui-text-dark-bg-primary/secondary/success/warning/error`（深色背景） |
+> 全控件 class 名速查表已迁移至 → `references/components.md` 末尾「CSS Class Reference」章节。
+> 使用任何控件前，按 **Master Index → 对应组件章节** 路径读取规格，class 速查见上述链接。
 
 ---
 
@@ -392,46 +388,22 @@ xyq-ui-design-system/
 
 ## Assets（资源库）与 Output（输出目录）
 
-```
-xyq-ui-design-system/
-├── assets/               ← 资源库：可读取、调用、复制，但不在此直接创建成品
-│   ├── ui_components.css      ← 基础控件样式库
-│   ├── 设计模板.html          ← 通用兜底模板（复制到 output/ 后使用）
-│   ├── 控件展示.html          ← 所有控件可视化预览（浏览器打开查阅）
-│   ├── 编辑器.html            ← 开发工具
-│   ├── resource/              ← 全局共享资源
-│   │   ├── 设计底图.jpg       ← 游戏背景底图（1024×768px）⚠️ 禁止替换
-│   │   ├── 华康圆体W7.TTC     ← 主字体文件 ⚠️ 禁止替换
-│   │   ├── 人物头像.png        ⚠️ 禁止替换
-│   │   ├── 人物模型.png        ⚠️ 禁止替换
-│   │   ├── 召唤兽头像.png      ⚠️ 禁止替换
-│   │   ├── 召唤兽模型.png      ⚠️ 禁止替换
-│   │   └── 道具图标.png        ⚠️ 禁止替换
-│   └── templates/             ← 可命中模板集（新增模板在此添加子目录）
-│       ├── 活动BP/            ← 模板：活动BP界面（多主题）
-│       │   ├── 活动BP界面规范.md
-│       │   ├── 新春庆典2.html  ← 新春红主题
-│       │   └── 暑假活动BP.html ← 海洋蓝主题
-│       ├── 节日活动主界面/     ← 模板：节日活动主界面
-│       │   ├── 节日活动主界面规范.md
-│       │   ├── index.html
-│       │   └── images/
-│       ├── 购买界面/           ← 模板：购买界面
-│       │   ├── 购买界面规范.md
-│       │   └── 购买界面.html
-│       ├── 奖励弹窗/           ← 模板：奖励说明弹窗
-│       │   ├── 奖励弹窗规范.md
-│       │   └── 奖励弹窗.html
-│       └── 礼包领取/           ← 模板：档位制礼包
-│           ├── 礼包领取规范.md
-│           └── 勤劳致富礼包领取界面.html
-└── output/               ← 成品输出目录：所有修改只发生在此
-    └── 界面名称.html
-```
+> 完整目录结构与路径替换规则见上方 [`## Assets`](#assets) 章节。本节仅列出禁止替换的关键资源。
 
-**路径约定**（HTML 在 `output/`）：
+**禁止替换/修改的资源**：
+
+| 文件 | 说明 |
+|------|------|
+| `assets/resource/设计底图.jpg` | 游戏背景底图（1024×768px） |
+| `assets/resource/华康圆体W7.TTC` | 主字体 |
+| `assets/resource/人物头像.png` / `人物模型.png` | 人物素材 |
+| `assets/resource/召唤兽头像.png` / `召唤兽模型.png` | 召唤兽素材 |
+| `assets/resource/道具图标.png` | 道具图标雪碧图 |
+
+**输出路径约定**（HTML 在 `output/`）：
 - CSS：`../assets/ui_components.css`
-- 图片资源：`../assets/resource/xxx.png`
+- 通用资源：`../assets/resource/xxx.png`
+- 模板专属资源：`../assets/templates/[模板名]/...`
 
 ## References
 
