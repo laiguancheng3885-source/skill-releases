@@ -1,11 +1,11 @@
 ---
 name: figma-ui-restore-v3
-version: "3.3"
+version: "3.5"
 based_on: figma-ui-restore-v2 v2.0
 description: |
-  将 HTML 代码或 UI 截图，使用 XYQ 自有 Figma 控件库还原为可编辑的 Figma 界面。
+  将 HTML 代码、UI 截图或 xiangxue-mh-vue 的 .vue 文件，使用 XYQ 自有 Figma 控件库还原为可编辑的 Figma 界面。
   当用户说"帮我还原这个界面"、"把这段 HTML 转成 Figma 稿"、"用控件库还原截图"、
-  "生成 Figma 设计稿"、"把这个页面搬到 Figma"、"还原这个 UI" 等时，必须使用此 Skill。
+  "生成 Figma 设计稿"、"把这个页面搬到 Figma"、"还原这个 UI"、"把这个 .vue 还原成 Figma" 等时，必须使用此 Skill。
   即使用户只是粘贴了一段 HTML 或上传了截图并说"帮我做成 Figma 稿"，也应触发此 Skill。
   用户说"重建控件目录"、"更新组件库索引"时，强制执行 Step 1 重建目录。
 
@@ -15,6 +15,19 @@ prerequisites: |
   包含 12 条从实际踩坑中提炼的硬性规则，违反任何一条都会导致还原结果错误。
 
 changelog:
+  - version: "3.5"
+    date: "2026-06-07"
+    changes:
+      - "新增 Vue 输入兼容（xiangxue-mh-vue）：Step 2 增 Vue 解析支线（组件标签 / data-mh-widget / src / inline 绝对坐标 / meta.designClass），Step 4 漏斗增 Level 0（mhCtlType/mhResPath 反查）。⚠️ 仅 .vue 输入触发，HTML/图片输入流程与既有规则零影响。"
+      - "css-figma-mapping.json v2.0.0→2.1.0：每条 figma 块新增 mhCtlType / mhResPath 两字段，harvest 自新库组件 description 的 _ctlType= / _resPath= 标记（22/39 有 ctlType，6/39 有 resPath）。"
+  - version: "3.4"
+    date: "2026-06-05"
+    breaking: true
+    changes:
+      - "【BREAKING】控件库迁移：从旧库 mMtG1gmIiynergLFT5a0vu 整体切换到新发布库 isF1ChGhW4SV26Umq3A0iu（旧库 fork 重发布版）。所有 componentKey 已重新解析（fork 重发布会重置全部 key），nodeId 大部分保留。"
+      - "全量更新：css-figma-mapping.json(36→39条)、catalog/*.json、key-cache.json、SKILL.md 内嵌 fileKey/Top10 引用，旧库串残留已清零。"
+      - "previews/ 重生成：62 张高频/⭐变体 PNG + _manifest.json 权威索引；variant_previews 回填。"
+      - "【移除】page-template 分类：原 catalog 的 390:xxxxx 框架组件经核验为伪造占位 ID（旧库、新库均 Node not found），整页框架还原降级为按原子控件手工拼装。"
   - version: "3.3"
     date: "2026-04-17"
     changes:
@@ -66,8 +79,8 @@ changelog:
 
 将 HTML 代码或 UI 截图，通过调用 XYQ 正式控件库，在 Figma 中自动还原为可编辑界面。
 
-**控件库文件 Key**：`mMtG1gmIiynergLFT5a0vu`
-**目标 Page**：`【XYQ-PC】控件库`（node-id: `274:1861`）
+**控件库文件 Key**：`isF1ChGhW4SV26Umq3A0iu`
+**目标 Page**：`02-规范说明（组件库）`（node-id: `274:1861`）
 **目录文件位置**：`.agents/skills/figma-ui-restore-v3/catalog/`
 **映射表位置**：`.agents/skills/figma-ui-restore-v3/assets/css-figma-mapping.json`
 **Key 缓存位置**：`.agents/skills/figma-ui-restore-v3/catalog/key-cache.json`
@@ -99,16 +112,16 @@ changelog:
 
 | CSS class | Figma 组件 | componentSetNodeId | variantMatch | 视觉说明 |
 |---|---|---|---|---|
-| `.ui-btn.ui-btn-primary` | btu_主次按钮 | `322:36629` | `{红:"yes", 状态:"正常"}` | 🔴 红色主按钮，确定/参与/开启 |
+| `.ui-btn.ui-btn-primary` | btu_主次按钮 | `322:36629` | `{红:"yes", 状态:"正常"}` | 🔴 红色主按钮，确定/参与/开启；key: `510de0c52e338ce559ac3d16210f5d79aae8cf98` |
 | `.ui-btn`（无 primary）| btu_主次按钮 | `322:36629` | `{红:"no", 状态:"正常"}` | 🔵 蓝色次级按钮，取消/返回 |
-| `.ui-btn-icon` | 方块按钮 | `341:40322` | `{btn_红蓝按钮:{红:"no"}}` | 图标方块按钮（蓝），key: `f095fa082774b55d76c00255ccbbe111653730bd` |
-| `.ui-window` | 弹窗 | `1441:64893` | `{}` | 弹窗底板，自带标题栏/关闭/问号 |
-| `.ui-area-bg` | 内衬底板 | `272:6255` | `{级别:"一级无底纹"}` | 🟡 **浅色**背景，内容区/卡片标配 |
-| `.ui-area-bg-dark` | 内衬底板 | `272:6255` | `{级别:"二级", 四角花纹:"false"}` | 🌑 **深色**背景，深色区域用 |
-| `.ui-input` | 亮底输入框 | `902:41571` | `{}` | 输入框（浅色背景用）|
-| `.ui-tabs-secondary` | btn_二级页签蓝 | `232:4858` | `{状态:"初始", 图标:"无"}` | 二级水平页签 |
-| `.ui-tabs-tertiary` | btn_三级页签蓝 | `258:931` | `{状态:"初始"}` | 三级页签 |
-| `.ui-radio-group` | 单选按钮 | `433:32010` | `{深色:"no", 状态:"0000", 已选:"no"}` | 单选框（浅色背景用 深色=no）|
+| `.ui-btn-icon` | 方块按钮 | `4472:32655` | `{}` | 图标方块按钮（type=COMPONENT，无变体）；2 个 BOOLEAN 属性 `小按钮_图标` / `新icon` 走 `setProperties`；key: `23af5b99fe7500454a0e74ba65597657b412359e` |
+| `.ui-window` | 弹窗 | `272:6389` | `{}` | 弹窗（type=COMPONENT，无变体）；1 个 BOOLEAN 属性 `页签` 走 `setProperties`；key: `0e7e96b41b68231626237c24b0ba52a868ddde5e` |
+| `.ui-area-bg` | 内衬底板 | `35019:56822` | `{级别:"一级无底纹"}` | 🟡 **浅色**背景，内容区/卡片标配；key: `619f5033cf10fdb28317e271b7430353d83e001f` |
+| `.ui-area-bg-dark` | 内衬底板 | `35019:56822` | `{级别:"二级", 四角花纹:"false"}` | 🌑 **深色**背景，深色区域用 |
+| `.ui-input` | 亮底输入框 | `902:41571` | `{可输入:"yes", 输入后:"no", 文字居中:"no"}` | 输入框（浅色背景用）；3 维 variant，default 已写死；key: `4cd1bbce775821f97b3865f86d6f5ccb9a214651` |
+| `.ui-tabs-secondary` | 2级页签蓝 | `232:4858` | `{状态:"初始", 图标:"无"}` | 二级水平页签（库内已改名"2级页签蓝"，nodeId 不变）；key: `a3bd47532a77f6b96750aa7dc54047a7d2fc79a2` |
+| `.ui-tabs-tertiary` | 3级页签蓝 | `258:931` | `{状态:"初始"}` | 三级页签（库内已改名"3级页签蓝"，nodeId 不变）；key: `9a541d1c686c633cf0e55dae8b154e54aedf2ead` |
+| `.ui-radio-group` | 单选项+文字 | `35019:3974` | `{暗底:"no"}` | 单选项+文字（浅色底板用 暗底=no，深色底板用 暗底=yes）；旧的「状态/已选」维度新库无对应，由父容器/runtime 处理；key: `48ed57614564c888933397e8578d1c4ca14348dd` |
 
 > ⚠️ **亮/暗底板判断规则**：
 > - `.ui-area-bg` → **永远**用 `一级无底纹`（浅色背景，弹窗内容区/卡片标配）
@@ -116,11 +129,12 @@ changelog:
 > - 不确定时看 HTML 注释，含"浅色衬底"→浅色，含"深色"→深色
 > - ⛔ 禁止用 `四级浅色`（视觉上仍偏深，经验证不符合预期）
 >
-> ⚠️ **「深色」属性含义（适用于单选按钮、复选框等含文字的交互控件）**：
-> - `深色=yes` → **白色文字**，用于**深色底板**（二级内衬底板、弹窗外暗色区域）
-> - `深色=no` → **黑色/深色文字**，用于**浅色底板**（一级无底纹内衬底板）
+> ⚠️ **「暗底」属性含义（适用于新库 `.ui-radio-group` → 单选项+文字）**：
+> - `暗底=yes` → 用于**深色底板**（二级内衬底板、弹窗外暗色区域），组件本身会切到适配深色的样式
+> - `暗底=no` → 用于**浅色底板**（一级无底纹内衬底板），默认值
 > - 判断依据：看该控件**所在父容器**是 `.ui-area-bg`（浅色→no）还是 `.ui-area-bg-dark`（深色→yes）
-> - ⛔ 不要靠控件自身的「深色」外观判断，而是看**它放在什么底板上**
+> - ⛔ 不要靠控件自身的视觉判断，而是看**它放在什么底板上**
+> - 📝 旧库的「深色/状态/已选」三维属性在新库 `35019:3974` 不存在；「已选」由 setProperties 切换 variant key 实现，「状态」（hover/click 等）由 runtime 不传，「深色」即此「暗底」
 
 ---
 
@@ -200,40 +214,43 @@ const mkLocal = async (componentSetNodeId, variantMatch) => {
 
 #### 1.1 已知 Section 列表
 
+> ⚠️ **新库为多页结构**（fork 重发布后）。组件分布在多个 design 页，部分 section 仍沿用旧 ID，部分已变。
+> 涉及页：`01-基础控件★★★★★`(`428:2085`)、`界面框架`(`424:32518`)、`道具框`(`441:760`)、`数据展示`(`424:32564`)、`信息承载`(`433:30822`)、`AI母版备注`(`36779:53156`)。
+> ⚠️ button/toggle/页签 散落在 `01-基础控件` 页且**不在任何 section 内**——这几类需**整页扫描** COMPONENT_SET，而非按 section。
+
 **第一批：**
-| 分类 | Section Node ID | 输出文件 |
-|-----|----------------|---------|
-| button | `587:2217` | `catalog/button.json` |
-| input | `900:49615` + `1498:59292` | `catalog/input.json` |
-| toggle | `424:32563` | `catalog/toggle.json` |
+| 分类 | Section / 页 Node ID | 所在页 | 输出文件 |
+|-----|----------------|------|---------|
+| button | 整页扫描 `428:2085` + `36789:50214`(方块按钮) | 01-基础控件 / AI母版备注 | `catalog/button.json` |
+| input | `900:49615`(搜索框) + `1498:59292`(数量输入) | 01-基础控件 | `catalog/input.json` |
+| toggle | 整页扫描 `428:2085`(滑动开关无独立 section) | 01-基础控件 | `catalog/toggle.json` |
 
 **第二批：**
-| 分类 | Section Node ID | 输出文件 |
-|-----|----------------|---------|
-| checkbox | `433:32007` | `catalog/checkbox.json` |
-| tab | `587:2218` + `927:42172` | `catalog/tab.json` |
-| dialog | `581:30523` | `catalog/dialog.json` |
+| 分类 | Section / 页 Node ID | 所在页 | 输出文件 |
+|-----|----------------|------|---------|
+| checkbox | `36789:50214`(母版专区，复选项) | AI母版备注 | `catalog/checkbox.json` |
+| tab | 整页扫描 `428:2085`(2级/3级页签蓝) + `927:42172`(翻页页码) | 01-基础控件 | `catalog/tab.json` |
+| dialog | `581:30523`(弹窗) + `581:30521`(二确弹窗) + `581:30519`(tips) | 界面框架 | `catalog/dialog.json` |
 
 **第三批：**
-| 分类 | Section Node ID | 输出文件 |
-|-----|----------------|---------|
-| bubble | `517:32016` + `517:32259` | `catalog/bubble.json` |
-| tag | `580:29135` + `503:31681` + `546:2818` | `catalog/tag.json` |
-| title | `546:2731` + `1498:59270` | `catalog/title.json` |
+| 分类 | Section / 页 Node ID | 所在页 | 输出文件 |
+|-----|----------------|------|---------|
+| bubble | `517:32016`(气泡框/对话框) + `517:32259`(NPC对话) | 信息承载 | `catalog/bubble.json` |
+| tag | `580:29135`(标签) + `503:31681`(红点) + `546:2818`(强调文案) | 信息承载 | `catalog/tag.json` |
+| title | `546:2731`(标题) + `1498:59270`(标题底) | 信息承载 | `catalog/title.json` |
 
 **第四批：**
-| 分类 | Section Node ID | 输出文件 |
-|-----|----------------|---------|
-| frame | `581:30526` + `424:32519` | `catalog/frame.json` |
-| item | `441:761` + `441:1218` | `catalog/item.json` |
-| data | `424:32617` + `547:32789` + `15218:65213` | `catalog/data.json` |
+| 分类 | Section / 页 Node ID | 所在页 | 输出文件 |
+|-----|----------------|------|---------|
+| frame | `581:30526`(内衬底板) + `424:32519`(飘字提示) | 界面框架 | `catalog/frame.json` |
+| item | `441:761`(道具框、头像框) + `441:1218`(技能图标/技能框) | 道具框 | `catalog/item.json` |
+| data | `424:32617`(进度条) + `547:32789`(代币显示) + `15218:65213`(表头) | 数据展示 / 信息承载 | `catalog/data.json` |
 
 **第五批：**
-| 分类 | Section Node ID | 输出文件 |
-|-----|----------------|---------|
-| empty | `547:33198` + `15203:65126` | `catalog/empty.json` |
-| background | `581:30526` | `catalog/background.json` |
-| page-template | `665:36218` + `7170:46800` | `catalog/page-template.json` |
+| 分类 | Section / 页 Node ID | 所在页 | 输出文件 |
+|-----|----------------|------|---------|
+| empty | `547:33198`(空状态) + `15203:65126`(锁) | 信息承载 | `catalog/empty.json` |
+| background | `2528:47020`(设计底图) | 界面框架 | `catalog/background.json` |
 
 ---
 
@@ -258,6 +275,17 @@ const mkLocal = async (componentSetNodeId, variantMatch) => {
 - 视觉识别界面中的 UI 元素类型
 - OCR 提取所有可见文字
 - 估算各元素位置坐标和相对尺寸
+
+**Vue 输入（xiangxue-mh-vue 文件，v3.5 新增 — ⚠️ 仅当输入为 `.vue` 文件时启用，HTML/图片输入完全不受影响）：**
+- 触发条件：输入文件后缀为 `.vue`，或内容含 `<template>` + `Mh*`/`Ui*` 组件标签。否则**跳过本节，按 HTML/图片分支处理**。
+- 解析 `<template>`，从外到内提取每个节点的：
+  - **组件标签名**（`UiBtnPrimary` / `MhButton` / `MhPanel` …）
+  - **`data-mh-widget`** 属性值（如 `Button` / `Edit` / `ItemBoxTreeView` / `ItemTreeView`）
+  - **`src` 资源路径**（如 `wzife/xyqs/common2024/btn_honganniu.png`）
+  - **inline style 绝对坐标**：`position:absolute; left/top/width/height` → ⭐ **直接作为 x/y/w/h，跳过 HTML 分支的 flex/gap/padding 推导**（xiangxue 全量绝对定位，无需推导）
+  - props（`:label` / `:color` / `:font-size` 等）→ 文案与样式
+- **补 `.ui-*` 锚点**：对 `Ui*` 组件，读其 `defineOptions.meta.designClass`（如 `.ui-btn-primary`）作为 cssClass 锚点；标签名本身也作为锚点。
+- 元素清单格式与下方一致，但额外标注 `mhWidget=` 与 `resPath=` 字段，供 Step 4 Level 0 使用。
 
 **⭐ 元素清单格式要求（v3.1）：**
 
@@ -356,7 +384,18 @@ const mkLocal = async (componentSetNodeId, variantMatch) => {
 ```
 ① 提取元素的 CSS class 列表
 
-② 六级匹配漏斗（命中即止步）：
+② 匹配漏斗（命中即止步）：HTML/图片输入走 Level 1→6；Vue 输入额外先走 Level 0（其余级不变）
+
+   Level 0 ── 仅 Vue 输入（mhCtlType / mhResPath 反查，HTML/图片输入跳过本级）
+     ⚠️ 触发条件：当前元素来自 Step 2 的 Vue 分支（带 mhWidget= / resPath= 字段）。
+        HTML/图片输入**不进入本级**，直接从 Level 1 开始，既有规则零影响。
+     → 在 assets/css-figma-mapping.json 的 mappings[] 中按以下优先级反查：
+         ├ a. resPath 命中：元素 resPath 的文件名（去目录、去末尾4位状态帧号）
+         │     == 某条 figma.mhResPath 的文件名 → 精确命中，止步，用该条 componentSetNodeId + variantMatch
+         ├ b. ctlType 命中：元素 mhWidget == 某条 figma.mhCtlType
+         │     → 若唯一 → 止步用该条；若多条同 ctlType → 用 designClass(.ui-*) 锚点在候选中二次过滤
+         └ c. designClass 命中：Ui* 的 meta.designClass(.ui-*) == 某条 cssClass → 止步用该条
+     → 命中任一 → 进入 ③；全部未命中 → 落回 Level 1（用 designClass / 标签名当作 cssClass 继续）
 
    Level 1 ── Top10 速查表（本 SKILL.md 上方表格，零 IO）
      → 精确匹配 cssClass → 得到 componentSetNodeId + variantMatch
@@ -380,7 +419,7 @@ const mkLocal = async (componentSetNodeId, variantMatch) => {
      → 置信度 MEDIUM → 进入 ③（可能策略B）
 
    Level 5 ── figma_search_components（API 调用）
-     figma_search_components(libraryFileKey: "mMtG1gmIiynergLFT5a0vu", query: "关键词")
+     figma_search_components(libraryFileKey: "isF1ChGhW4SV26Umq3A0iu", query: "关键词")
      → 选最匹配结果 → 置信度 LOW → 进入 ③（策略B）
      → 完成实例化后询问用户：「是否将此组件的 CSS class 映射写入 key-cache？」
 
@@ -404,7 +443,7 @@ const mkLocal = async (componentSetNodeId, variantMatch) => {
        优先级2 ── 跨页 clone（当前页≠控件库页面时，getNodeByIdAsync 返回 null）
          ⚠️ getNodeByIdAsync 无法跨页获取节点！
          改用 figma_search_components 在库中搜索：
-           figma_search_components(libraryFileKey: "mMtG1gmIiynergLFT5a0vu", query: "模型")
+           figma_search_components(libraryFileKey: "isF1ChGhW4SV26Umq3A0iu", query: "模型")
          → 找到匹配结果 → 用 figma_instantiate_component 实例化
          → 未找到 → 进入优先级3
 
@@ -490,7 +529,6 @@ const mkLocal = async (componentSetNodeId, variantMatch) => {
 | `.progress` `.list` `<table>` | data |
 | `.empty` `.locked` | empty |
 | `<body>` 整页背景 | background |
-| 整页模板框架 | page-template |
 
 #### 分区块检查点
 
