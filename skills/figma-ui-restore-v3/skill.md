@@ -1,6 +1,6 @@
 ---
 name: figma-ui-restore-v3
-version: "3.5"
+version: "3.6"
 based_on: figma-ui-restore-v2 v2.0
 description: |
   将 HTML 代码、UI 截图或 xiangxue-mh-vue 的 .vue 文件，使用 XYQ 自有 Figma 控件库还原为可编辑的 Figma 界面。
@@ -12,9 +12,17 @@ description: |
 prerequisites: |
   ⚠️ **执行任何操作前，必须先读取 RULES.md 文件！**
   路径：.agents/skills/figma-ui-restore-v3/RULES.md
-  包含 12 条从实际踩坑中提炼的硬性规则，违反任何一条都会导致还原结果错误。
+  包含 14 条从实际踩坑中提炼的硬性规则，违反任何一条都会导致还原结果错误。
 
 changelog:
+  - version: "3.6"
+    date: "2026-06-08"
+    changes:
+      - "【修复】Top10 速查表 key 错填为 COMPONENT_SET key（内衬底板/亮底输入框/单选项+文字/2级页签蓝/3级页签蓝/主次按钮），import 会返回 null。全部换成可直接 importComponentByKeyAsync 的变体 key，并加显著告警（set key vs 变体 key）。area-bg-dark variantMatch 去掉不存在的 四角花纹 属性。"
+      - "【精简】Step 2 末尾删去「输出元素清单后向用户确认」环节，直接进入后续步骤。"
+      - "【精简】策略C / 模型占位框不再在画布上加 🔴 文字标注，仅记录到还原报告，避免污染画布。"
+      - "【新增 R13】容器必须归组成命名 FRAME（卡片底板+内容合并），内容区与背景底板也合并；采用「先平铺算坐标→最后归组」策略，不影响坐标估算。新增 Step 5.5 归组步骤。"
+      - "【新增 R14】字号只允许两档：常用文字 16px、说明辅助文字 14px，禁止杂号。"
   - version: "3.5"
     date: "2026-06-07"
     changes:
@@ -109,19 +117,23 @@ changelog:
 ## 🔥 Top10 速查表（直接用，零文件 IO）
 
 > **v3 新增**：这 10 个是出现频率最高的 class，AI 读 SKILL.md 时已在上下文中，**无需读任何文件**。
+>
+> ⚠️ **【v3.6 修正】key 列全部为「变体 key」（type=COMPONENT），可直接 `importComponentByKeyAsync` / `mkInst`。**
+> ⛔ **绝不要拿 COMPONENT_SET 的 key 去 import**——会失败返回 `null`（历史踩坑：内衬底板/输入框/单选项/页签曾误填 set key）。
+> 凡是带变体维度（variantMatch 非空）的组件，速查表里给的就是对应那个 default 变体的 key；要切其它变体，实例化后再 `setProperties` 即可。
 
-| CSS class | Figma 组件 | componentSetNodeId | variantMatch | 视觉说明 |
+| CSS class | Figma 组件 | componentSetNodeId | variantMatch | 视觉说明（key = 可直接 import 的**变体 key**） |
 |---|---|---|---|---|
-| `.ui-btn.ui-btn-primary` | btu_主次按钮 | `322:36629` | `{红:"yes", 状态:"正常"}` | 🔴 红色主按钮，确定/参与/开启；key: `510de0c52e338ce559ac3d16210f5d79aae8cf98` |
-| `.ui-btn`（无 primary）| btu_主次按钮 | `322:36629` | `{红:"no", 状态:"正常"}` | 🔵 蓝色次级按钮，取消/返回 |
+| `.ui-btn.ui-btn-primary` | btu_主次按钮 | `322:36629` | `{红:"yes", 状态:"正常"}` | 🔴 红色主按钮，确定/参与/开启；key: `d4b8300693c2a41017f7ba9ac3c734dfc6c73546` |
+| `.ui-btn`（无 primary）| btu_主次按钮 | `322:36629` | `{红:"no", 状态:"正常"}` | 🔵 蓝色次级按钮，取消/返回；key: `2a26fb294384218187077d0c011abaf9223584f0` |
 | `.ui-btn-icon` | 方块按钮 | `4472:32655` | `{}` | 图标方块按钮（type=COMPONENT，无变体）；2 个 BOOLEAN 属性 `小按钮_图标` / `新icon` 走 `setProperties`；key: `23af5b99fe7500454a0e74ba65597657b412359e` |
 | `.ui-window` | 弹窗 | `272:6389` | `{}` | 弹窗（type=COMPONENT，无变体）；1 个 BOOLEAN 属性 `页签` 走 `setProperties`；key: `0e7e96b41b68231626237c24b0ba52a868ddde5e` |
-| `.ui-area-bg` | 内衬底板 | `35019:56822` | `{级别:"一级无底纹"}` | 🟡 **浅色**背景，内容区/卡片标配；key: `619f5033cf10fdb28317e271b7430353d83e001f` |
-| `.ui-area-bg-dark` | 内衬底板 | `35019:56822` | `{级别:"二级", 四角花纹:"false"}` | 🌑 **深色**背景，深色区域用 |
-| `.ui-input` | 亮底输入框 | `902:41571` | `{可输入:"yes", 输入后:"no", 文字居中:"no"}` | 输入框（浅色背景用）；3 维 variant，default 已写死；key: `4cd1bbce775821f97b3865f86d6f5ccb9a214651` |
-| `.ui-tabs-secondary` | 2级页签蓝 | `232:4858` | `{状态:"初始", 图标:"无"}` | 二级水平页签（库内已改名"2级页签蓝"，nodeId 不变）；key: `a3bd47532a77f6b96750aa7dc54047a7d2fc79a2` |
-| `.ui-tabs-tertiary` | 3级页签蓝 | `258:931` | `{状态:"初始"}` | 三级页签（库内已改名"3级页签蓝"，nodeId 不变）；key: `9a541d1c686c633cf0e55dae8b154e54aedf2ead` |
-| `.ui-radio-group` | 单选项+文字 | `35019:3974` | `{暗底:"no"}` | 单选项+文字（浅色底板用 暗底=no，深色底板用 暗底=yes）；旧的「状态/已选」维度新库无对应，由父容器/runtime 处理；key: `48ed57614564c888933397e8578d1c4ca14348dd` |
+| `.ui-area-bg` | 内衬底板 | `35019:56822` | `{级别:"一级无底纹"}` | 🟡 **浅色**背景，内容区/卡片标配；key: `b1b970d164a8b2291ec361043d3a2caa1aea5544` |
+| `.ui-area-bg-dark` | 内衬底板 | `35019:56822` | `{级别:"二级"}` | 🌑 **深色**背景，深色区域用；key: `4bece6b71943824a202d2fe54516a4ecc0fd2b33` |
+| `.ui-input` | 亮底输入框 | `902:41571` | `{可输入:"yes", 输入后:"no", 文字居中:"no"}` | 输入框（浅色背景用）；3 维 variant，default 已写死；key: `33572b6d4e97addfb4939d10f49697743608d779` |
+| `.ui-tabs-secondary` | 2级页签蓝 | `232:4858` | `{状态:"初始", 图标:"无"}` | 二级水平页签；key: `d3df3bc209eeeb2e34ef6fd82cf7f484804cb126`（选中变体 key: `30e5127ba1cf08671e864941a5bede77c32605a7`） |
+| `.ui-tabs-tertiary` | 3级页签蓝 | `258:931` | `{状态:"初始"}` | 三级页签；key: `1b0432a7121cbbf1da5c454fa71b52a07df99dca`（选中变体 key: `605658dbf79b235482c6b04556acd7d41814563f`） |
+| `.ui-radio-group` | 单选项+文字 | `35019:3974` | `{暗底:"no"}` | 单选项+文字（浅色底板用 暗底=no，深色底板用 暗底=yes）；旧的「状态/已选」维度新库无对应，由父容器/runtime 处理；key: `5dc8d5802ba8bfa1d65d89edfed1fb421000b134` |
 
 > ⚠️ **亮/暗底板判断规则**：
 > - `.ui-area-bg` → **永远**用 `一级无底纹`（浅色背景，弹窗内容区/卡片标配）
@@ -314,7 +326,7 @@ const mkLocal = async (componentSetNodeId, variantMatch) => {
                → 图标容器: flex: 1, justify: space-between
 ```
 
-**输出标准化元素清单后，向用户展示并确认，有误可纠正后继续。**
+**输出标准化元素清单后，直接进入后续步骤（无需等待用户确认）。**
 
 ---
 
@@ -425,8 +437,7 @@ const mkLocal = async (componentSetNodeId, variantMatch) => {
 
    Level 6 ── 策略C
      → figma_create_child 基础图形
-     → 标注 🔴「新增-请替换」
-     → 记录到还原报告
+     → 仅记录到还原报告（⛔ 不在画布上加 🔴 文字标注）
 
    【特殊：模型图片处理】
      HTML 含 img[src*='模型'] 或 img[src*='泡泡'] 或 `.ui-model-pet` 等模型图片时：
@@ -447,10 +458,9 @@ const mkLocal = async (componentSetNodeId, variantMatch) => {
          → 找到匹配结果 → 用 figma_instantiate_component 实例化
          → 未找到 → 进入优先级3
 
-       优先级3 ── 占位框 + 标注
+       优先级3 ── 占位框
          → 创建一个与 HTML 中模型同尺寸的占位矩形（圆角，半透明灰色填充）
-         → 在占位框上方添加文字标注「🔴 模型占位-请替换」
-         → 报告里标注「模型图-需人工替换为对应角色」
+         → 报告里标注「模型图-需人工替换为对应角色」（⛔ 不在画布上加 🔴 文字标注）
 
        ⛔ 禁止：跳过优先级1和2，直接用占位框
 
@@ -487,8 +497,8 @@ const mkLocal = async (componentSetNodeId, variantMatch) => {
       → 该 FRAME 的图层在弹窗之上（后 appendChild 的自然在上层）
    c. 递归处理弹窗的所有 children 元素 → 全部放入「内容层」FRAME
       → 内容元素的坐标按弹窗内部区域计算（跳过标题栏高度）
-   d. 对于非弹窗的普通容器（内衬底板等）也同理：
-      实例化底板 → 创建透明内容画框叠加 → children 放入画框
+   d. 对于非弹窗的普通容器（内衬底板等）也同理（见 R13）：
+      先按绝对坐标平铺底板与内容，最后在 Step 5.5 统一归组成命名 FRAME（如 卡片-赛事信息）。
 
    示例代码：
    ```javascript
@@ -638,13 +648,19 @@ line.fills = [{ type: 'SOLID', color: 解析 border 颜色, opacity: 解析 opac
 
 | 组件 | 默认宽 × 高 | 说明 |
 |------|------------|------|
-| btn_三级页签蓝 | 76 × 26 | 文字短时可能更窄 |
-| 技能图标40*40 | 40 × 40 | 固定 |
-| 单选按钮 | 62 × 24 | 含文字 |
-| btu_主次按钮 | 可 resize | 按文字长度调整 |
+| 弹窗 | 396 × 544 | 默认值，可 resize |
+| 内衬底板（一级无底纹）| 556 × 362 | 默认值，按容器 resize |
+| btu_主次按钮 | 94 × 26 | 默认值，按文字长度 resize |
+| 亮底输入框 | 182 × 26 | 默认值，按容器 resize |
+| 2级页签蓝 | 104 × 26 | 文字短时可能更窄 |
+| 3级页签蓝 | 76 × 26 | 文字短时可能更窄 |
+| 单选项+文字 | 62 × 24 | 含文字标签（35019:3974，暗底 no/yes）|
+| 复选项 | 22 × 22 | 仅勾选框，无文字 |
+| 复选项+文字 | 61 × 22 | 含文字标签 |
 | 方块按钮 | 26 × 26 | 固定 |
+| 弹窗关闭 | 17 × 17 | 固定 |
+| 技能图标40 | 40 × 40 | 固定 |
 | NPC头像_绿(尺寸=56) | 56 × 56 | 固定 |
-| 内衬底板 | 可 resize | 按容器计算 |
 
 ---
 
@@ -662,6 +678,27 @@ line.fills = [{ type: 'SOLID', color: 解析 border 颜色, opacity: 解析 opac
    - margin-top: auto → Step 4.5.4 贴底
 4. 最后处理分隔线（Step 4.5.5）
 5. 所有组件放入一个命名 Section：「UI还原-[来源描述]」
+```
+
+> ⭐ **字号约束（R14）**：所有文字只用两档——**常用文字（标题/标签/按钮/输入内容/选项）= 16px**，**说明辅助文字（计数 0/10、提示、固定值说明、次要注释）= 14px**。⛔ 禁止用 12/13/15 杂号。
+
+---
+
+### Step 5.5：容器归组（R13，放在最后做）
+
+> ⛔ **这一步不可省略**。坐标已在 Step 4.5/Step 5 用绝对坐标平铺算完，归组**不改坐标**，只重组图层层级，让每个卡片/区域可整体选中移动。
+
+```
+执行时机：所有元素摆放完毕 + 截图验证无误后，再做归组。
+
+1. 识别容器边界：每个 .ui-area-bg / .ui-area-bg-dark 卡片是一个容器。
+2. 对每个卡片：新建/选取一个 FRAME，命名「卡片-<标题>」（如 卡片-赛事信息），
+   把该卡片的【底板实例 + 它范围内的所有内容子元素】appendChild 进去。
+   → 归组后子元素坐标按相对自动保持视觉不变（appendChild 不动绝对位置）。
+3. 内容区与背景底板合并：把弹窗内容层 + 各卡片 FRAME 等归到统一层级，
+   与背景底板一起构成单一可整体移动的结构。
+4. 弹窗本身遵守 R1：保持完整实例 + 透明「内容层」FRAME 不变，
+   R13 归组针对的是弹窗内的卡片与页面级容器。
 ```
 
 ---
@@ -725,10 +762,7 @@ snap(sectionFrameId) 截图当前还原结果
 - 所有还原结果放入命名 Section，不要散放在画布上
 - 建目录时分批处理（每批 3 个 Section），处理完一批立即保存
 - 匹配时每次只加载一个分类目录文件，不全量加载
-- **【v3.1】布局必须精确计算**：⛔ 禁止凭感觉估算坐标，所有 x/y/w/h 必须从 CSS flex/gap/padding 数值推导（Step 4.5）
-- **【v3.1】flex:1 → 做减法**：遇到 `flex: 1` 的元素，先算固定元素占用空间，再用总宽度减去得到自适应宽度
-- **【v3.1】space-between → 做除法**：遇到 `justify-content: space-between`，用 (容器内宽 - 子元素总宽) / (N-1) 得到均匀间距
-- **【v3.1】分隔线不要遗漏**：HTML 的 `border-bottom` / `border-top` 必须还原为 1px 矩形
+- **【v3.1】布局必须精确计算**：⛔ 禁止凭感觉估算坐标，所有 x/y/w/h 从 CSS 数值推导。细节见 Step 4.5——flex:1 做减法(4.5.2)、space-between 做除法(4.5.3)、flex:1 优先于 space-between 等宽填充(4.5.7)、border-bottom/top 还原 1px 矩形(4.5.5)
 - **【v3.1】根据 published 字段选择实例化方式**：mapping.json 每个条目已标注 `"published": true/false`
   - `published: true` → 用 `mkInst(componentKey)`（快路径）
   - `published: false` → 用 `mkLocal(componentSetNodeId, variantMatch)`（本地路径）
@@ -740,13 +774,12 @@ snap(sectionFrameId) 截图当前还原结果
 - **【v3】映射表优先**：有 CSS class 时，Top10 → mapping.json 必须先于 catalog 查找
 - **【v3】防错函数头必须注入**：每个 figma_execute 调用都要带函数头（含 mkLocal），不允许省略
 - **【v3】新发现组件先询问再持久化**：Level 3/4 命中的组件，用户确认后才写 key-cache
-- **【v3.2】单选按钮状态字段**：Figma 实际属性值为纯数字 `0000`/`0001`/`0002`/`0003`，⛔ 不含中文括号后缀（如 `0000（正常）` 会匹配失败导致 mkLocal 回退到 children[0]）
+- **【v3.6】单选/复选用新库组件，无 0000 状态枚举**：新库单选=`单选项+文字`(35019:3974，维度 `暗底` no/yes)、复选=`复选项`(35014:61517)/`复选项+文字`(35019:3995)。⛔ 旧库「单选按钮/多选按钮」(433:xxxxx) 及其 `0000/0001/0002/0003` 状态枚举已废弃，不要再用
 - **【v3.2】「深色」属性不是视觉描述，而是底板适配**：深色=yes→白字→放深色底板上；深色=no→黑字→放浅色底板上。判断方法：看控件所在父容器是 `.ui-area-bg`(浅色→no) 还是 `.ui-area-bg-dark`(深色→yes)
-- **【v3.2】flex:1 优先于 space-between**：当子元素都有 `flex: 1` 时，忽略容器的 `space-between`，按等宽填充计算（Step 4.5.7）
 - **【v3.2】跨页获取节点会返回 null**：`getNodeByIdAsync` 只能访问当前页面的节点。需要控件库页面的资源（如模型、背景底图）时，改用 `figma_search_components` + `importComponentByKeyAsync` 从已发布库导入
 - **【v3.2】⛔ 弹窗底板禁止 detach**：弹窗组件保持完整实例不动，内容元素放入叠加的透明 FRAME（「内容层」），不要 appendChild 到弹窗实例内部（详见 Step 4 ⑦）
 - **【v3.3】⛔ 严格按 DOM 层级从外到内还原，禁止跳过外层容器**：HTML 的 `<body class="design-bg">` → `.design-container` → `.ui-window` 必须逐层处理。背景底图（`design-bg`）是最外层，必须在 Step 3 优先铺设，弹窗居中放置其上。**绝对不允许**跳过背景直接从弹窗开始——即使弹窗是视觉焦点，背景底图仍是 mapping.json 中 `confidence: HIGH` 的有效组件映射（`设计底图 0042d258…`）
-- **【v2】选型必须先看预览图，禁止在 Figma 里试错**
+- **【v3.6】previews/ 是「可选参考资产」，非主流程必读**：happy path（Top10/mapping HIGH 命中）直接用 key 实例化，**不需要读预览图**。只有在 Level 4/5 低置信、或人工想视觉确认选型时，才 `read_file` 对应 `local_image` 参考。⛔ 不存在「实例化前必须先看图」的硬约束（旧 v2 说法已废弃）
 - **【v2】setProperties 后立即 resize，不允许分开两次调用**
 - **【v2】每完成一个区块截图检查，不等全部完成再验证**
 - **截图用 `snap(nodeId)` 函数，不要直接 exportAsync SECTION 节点（会返回白图）**
